@@ -38,6 +38,7 @@ I chose to include a backend for a number of reasons:
 - It prevents an API key from sitting in browser. This is a security concern and something I'd rather not do, even in a non-production app.
 - It allows a lot more flexibility in data collection, metrics etc.
 
+I also chose not to follow TDD in creating this software and I regret it. I only chose to tack on a small suite of tests after all of the funcionality had been built, and those were written largely by AI. I generally work hard for a high degree of test coverage.
 
 # Notes from the development process
 ### Project Setup
