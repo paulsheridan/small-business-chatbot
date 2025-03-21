@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Container,
-  Box,
-} from "@mui/material";
+import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import axios from "axios";
 import {
   BrowserRouter as Router,
@@ -43,15 +36,27 @@ const AppHeader: React.FC = () => {
 function App() {
   return (
     <Router>
-      <AppHeader />
-      <Container maxWidth="md" style={{ marginTop: "2rem" }}>
-        <Box display="flex" justifyContent="center">
+      <Box
+        display="flex"
+        flexDirection="column"
+        minHeight="100vh"
+        width="100vw"
+      >
+        <AppHeader />
+        <Box
+          flexGrow={1}
+          display="flex"
+          justifyContent="center"
+          alignItems="flex-start"
+          p={3}
+          width="100%"
+        >
           <Routes>
             <Route path="/" element={<Chat />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </Box>
-      </Container>
+      </Box>
     </Router>
   );
 }

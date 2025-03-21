@@ -8,7 +8,6 @@ This is an AI powered chatbot for ABC Computer Repair, a pretend computer repair
 
 # Installation:
 You can just fork or clone this repository and use it as is.
-✨ It just works. ✨
 
 - Clone this repository
 ```bash
@@ -20,9 +19,11 @@ git clone git@github.com:paulsheridan/small-business-chatbot.git
 cd small-business-chatbot
 ```
 
-- Add an OpenAI key to your env either by
-    - adding a .env file to the `backend` directory of this project, or
-    - exporting one to memory
+- Add an OpenAI key to your environment
+```bash
+export OPENAI_API_KEY="your_key_here"
+```
+
 - Use docker to start the frontend and backend
 ```bash
 docker-compose up --build
@@ -57,7 +58,7 @@ I've decided that this business will be a computer repair business. I'll be usin
 - FAQ's (this was ChatGPT's idea, I think it's great.)
 I've also asked ChatGPT to whip up some default data. It's been added to package.json and can be run with `npm run seed` so that you're not stuck typing.
 
-In re-reading the coding challenge, I realize that an administrative UI wherein business details can be changed is not explicitly requested. In the interest of staying as close as possible to the requested software, I'm removing it and replacing it with a Typescript file with hard-coded business data. I'll add it back if I have time because I think it'd be cool.
+In re-reading the coding challenge, I realize that an administrative UI wherein business details can be changed is not explicitly requested. In the interest of staying as close as possible to the requested software, I'm removing it and replacing it with a Typescript file with hard-coded business data.
 
 ### Metrics
 We've got streaming responses and a reliable chatbot. Where to next? Let's log the messages sent on the app and make them available in a dashboard.
