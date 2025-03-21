@@ -1,44 +1,56 @@
 import { useEffect, useState } from "react";
-import { Container, Typography, Button } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Container,
+  Box,
+} from "@mui/material";
 import axios from "axios";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Chat from "./pages/Chat";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const AppHeader: React.FC = () => {
+  const location = useLocation();
+  const isDashboard = location.pathname === "/dashboard";
+
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          ABC Computer Repair
+        </Typography>
+        <Button
+          color="inherit"
+          component={Link}
+          to={isDashboard ? "/" : "/dashboard"}
+        >
+          {isDashboard ? "Chat" : "Dashboard"}
+        </Button>
+      </Toolbar>
+    </AppBar>
+  );
+};
 
 function App() {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    axios.get(`${API_URL}/`).then((res) => setMessage(res.data.message));
-  }, []);
   return (
     <Router>
+      <AppHeader />
       <Container maxWidth="md" style={{ marginTop: "2rem" }}>
-        <Typography variant="h4">Chatbot App</Typography>
-        <Typography variant="body1">{message}</Typography>
-        <Button
-          component={Link}
-          to="/"
-          variant="contained"
-          style={{ marginRight: "1rem" }}
-        >
-          Chat
-        </Button>
-        <Button
-          component={Link}
-          to="/dashboard"
-          variant="contained"
-          color="secondary"
-        >
-          Dashboard
-        </Button>
-
-        <Routes>
-          <Route path="/" element={<Chat />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
+        <Box display="flex" justifyContent="center">
+          <Routes>
+            <Route path="/" element={<Chat />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </Box>
       </Container>
     </Router>
   );

@@ -1,6 +1,6 @@
 const businessData = {
   name: "ABC Computer Repair",
-  address: "123 Main St, YourCity, YourState, 12345",
+  address: "123 Main St, Seattle, WA, 98109",
   phone: "123-456-7890",
   email: "info@abccr.com",
   website: "http://www.abccr.com",

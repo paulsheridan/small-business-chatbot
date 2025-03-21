@@ -2,11 +2,10 @@ import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import axios from "axios";
 
 import businessData from "./businessData";
-import { saveMessage } from "./db";
-import db from "./db";
+import db, { saveMessage } from "./db";
+import { isWeatherQuestion, fetchWeather } from "./utilities";
 
 dotenv.config();
 
@@ -44,7 +43,7 @@ app.post("/chat", async (req, res) => {
 
     const context = `Business Info: ${JSON.stringify(businessData, null, 2)}`;
 
-    // Initializing weatherInfo as an empty string so we know whether or not to pass it on later.
+    // Determine if weather is a part of the question, if so, call fetchWeather
     let weatherInfo = "";
     if (isWeatherQuestion(question)) {
       weatherInfo = await fetchWeather();
@@ -64,6 +63,7 @@ app.post("/chat", async (req, res) => {
     ];
 
     if (weatherInfo) {
+      // Push gives us an easy way to add context info conditionally.
       messages.push({
         role: "system",
         content: `Weather Info: ${weatherInfo}`,
@@ -80,6 +80,7 @@ app.post("/chat", async (req, res) => {
 
     let fullResponse = "";
 
+    // Update our response as the stream comes in.
     for await (const chunk of stream) {
       const text = chunk.choices[0]?.delta?.content || "";
       res.write(text); // Stream data to the client
@@ -89,8 +90,9 @@ app.post("/chat", async (req, res) => {
     // Send our response to the database to sit and wait until we need it.
     saveMessage("assistant", fullResponse);
 
-    res.end(); // End the stream
-  } catch (error) {
+    // End the stream
+    res.end();
+  } catch (error: any) {
     console.error(
       "Error processing chat:",
       error.response?.data || error.message
@@ -99,7 +101,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-app.get("/messages", (req, res) => {
+app.get("/messages", (_, res) => {
   try {
     const messages = db
       .prepare("SELECT * FROM messages ORDER BY timestamp ASC")
@@ -114,50 +116,3 @@ app.get("/messages", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
-const weatherKeywords = [
-  "weather",
-  "temperature",
-  "forecast",
-  "rain",
-  "snow",
-  "storm",
-  "humidity",
-  "wind",
-  "sunny",
-  "cloudy",
-  "fog",
-  "hail",
-  "thunder",
-  "lightning",
-  "drizzle",
-  "heat",
-  "cold",
-  "climate",
-];
-
-// Function to check if a question is about the weather
-function isWeatherQuestion(question: string): boolean {
-  const lowerQuestion = question.toLowerCase();
-  return weatherKeywords.some((keyword) => lowerQuestion.includes(keyword));
-}
-
-async function fetchWeather() {
-  try {
-    const latitude = 40.7128; // Replace with actual location
-    const longitude = -74.006; // Replace with actual location
-    const response = await axios.get("https://api.open-meteo.com/v1/forecast", {
-      params: {
-        latitude,
-        longitude,
-        current_weather: true,
-      },
-    });
-
-    const weather = response.data.current_weather;
-    return `The current temperature is ${weather.temperature}°C with ${weather.weathercode}.`;
-  } catch (error) {
-    console.error("Error fetching weather data:", error);
-    return "Sorry, I couldn't retrieve the weather right now.";
-  }
-}
