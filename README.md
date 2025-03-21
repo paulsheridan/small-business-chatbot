@@ -10,23 +10,32 @@ This is an AI powered chatbot for ABC Computer Repair, a pretend computer repair
 You can just fork or clone this repository and use it as is.
 ✨ It just works. ✨
 
-Clone this repository
-`git clone git@github.com:paulsheridan/small-business-chatbot.git`
-Enter into the new directory:
-`cd small-business-chatbot`
-Add an OpenAI key to your env either by
-- adding a .env file to the `backend` directory of this project, or
-- exporting one to memory
-Use docker to start the frontend and backend
-`docker-compose up --build`
-Last, navigate to `http://localhost:5173/` in your browser.
+- Clone this repository
+```bash
+git clone git@github.com:paulsheridan/small-business-chatbot.git
+```
+
+- Enter into the new directory:
+```bash
+cd small-business-chatbot
+```
+
+- Add an OpenAI key to your env either by
+    - adding a .env file to the `backend` directory of this project, or
+    - exporting one to memory
+- Use docker to start the frontend and backend
+```bash
+docker-compose up --build
+```
+
+- Last, navigate to `http://localhost:5173/` in your browser.
 
 
 # Architectural Decisions
 I chose to include a backend for a number of reasons:
 - Docker compose makes it easy to ensure that both a frontend and backend are running and will exist on the same network reliably
 - It prevents an API key from sitting in browser. This is a security concern and something I'd rather not do, even in a non-production app.
-- It allows a lot more flexibility and
+- It allows a lot more flexibility in data collection, metrics etc.
 
 
 # Notes from the development process
