@@ -8,7 +8,6 @@ import {
   Box,
 } from "@mui/material";
 import { create } from "zustand";
-import axios from "axios";
 
 // Define a type for messages
 interface Message {
@@ -16,7 +15,7 @@ interface Message {
   content: string;
 }
 
-// Create a Zustand store to hold on to chat messages
+// Create a Zustand store to manage chat messages
 interface ChatState {
   messages: Message[];
   addMessage: (msg: Message) => void;
@@ -32,32 +31,57 @@ const Chat: React.FC = () => {
   const { messages, addMessage } = useChatStore();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-  // Function to handle sending a chat message
+  // Function to handle streaming chat response
   const handleSend = async () => {
     const trimmedInput = input.trim();
     if (!trimmedInput) return;
 
-    // Add the user's message to the chat state
     addMessage({ role: "user", content: trimmedInput });
     setInput("");
     setLoading(true);
 
+    // Add an empty assistant message to be updated in real-time
+    let newAssistantMessage = { role: "assistant", content: "" };
+    addMessage(newAssistantMessage);
+
     try {
-      // Call the /chat endpoint on the backend
-      const response = await axios.post(`${apiUrl}/chat`, {
-        question: trimmedInput,
+      const response = await fetch(`${apiUrl}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: trimmedInput }),
       });
-      const answer = response.data.answer;
-      // Add the assistant's answer to the chat state
-      addMessage({ role: "assistant", content: answer });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch response");
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      while (reader) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+
+        // Append the new text to the last assistant message
+        newAssistantMessage = {
+          ...newAssistantMessage,
+          content: newAssistantMessage.content + chunk,
+        };
+
+        // Update Zustand state
+        useChatStore.setState((state) => ({
+          messages: state.messages.map((msg, index) =>
+            index === state.messages.length - 1 ? newAssistantMessage : msg
+          ),
+        }));
+      }
     } catch (error) {
-      console.error("Error calling /chat endpoint:", error);
-      addMessage({
-        role: "assistant",
-        content: "Sorry, something went wrong.",
-      });
+      console.error("Error streaming response:", error);
+      newAssistantMessage.content = "Sorry, something went wrong.";
     } finally {
       setLoading(false);
     }
@@ -109,9 +133,7 @@ const Chat: React.FC = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask a question..."
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSend();
-            }
+            if (e.key === "Enter") handleSend();
           }}
         />
         <Button
