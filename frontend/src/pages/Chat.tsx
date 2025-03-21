@@ -21,6 +21,8 @@ interface ChatState {
   addMessage: (msg: Message) => void;
 }
 
+// The frontend uses its own storage medium for past messages, even though
+// the backend logs all messages sent.
 const useChatStore = create<ChatState>((set) => ({
   messages: [],
   addMessage: (msg: Message) =>
@@ -33,7 +35,7 @@ const Chat: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
-  // Function to handle streaming chat response
+  // Handle streaming chat response
   const handleSend = async () => {
     const trimmedInput = input.trim();
     if (!trimmedInput) return;
@@ -72,7 +74,7 @@ const Chat: React.FC = () => {
           content: newAssistantMessage.content + chunk,
         };
 
-        // Update Zustand state
+        // Update our Zustand state
         useChatStore.setState((state) => ({
           messages: state.messages.map((msg, index) =>
             index === state.messages.length - 1 ? newAssistantMessage : msg
@@ -82,6 +84,7 @@ const Chat: React.FC = () => {
     } catch (error) {
       console.error("Error streaming response:", error);
       newAssistantMessage.content = "Sorry, something went wrong.";
+      // Finally will ensure that setLoading is changed to False no matter what.
     } finally {
       setLoading(false);
     }
